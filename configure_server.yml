@@ -1,0 +1,42 @@
+---
+- name: Configurar servidor
+  hosts: docker_containers
+  gather_facts: yes
+
+  tasks:
+    - name: Actualizar lista de paquetes
+      ansible.builtin.apt:
+        update_cache: yes
+      become: yes
+      become_method: su
+
+    - name: Actualizar todos los paquetes
+      apt:
+        upgrade: yes
+        autoremove: yes
+      become: yes
+
+    - name: Instalar Nginx
+      apt:
+        name: nginx
+        state: present
+      become: yes
+
+    - name: Crear archivo HTML personalizado
+      copy:
+        content: "Servidor desplegado automáticamente con Ansible + Terraform"
+        dest: /var/www/html/index.html
+      become: yes
+
+    - name: Asegurar que Nginx está corriendo
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+      become: yes
+
+    - name: Crear directorio temporal
+      ansible.builtin.file:
+        path: /tmp/.ansible
+        state: directory
+        mode: '1777'
